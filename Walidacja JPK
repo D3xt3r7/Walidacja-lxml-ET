@@ -1,0 +1,85 @@
+from lxml import etree
+import os
+
+def validate_jpk_xml(xml_path, xsd_path):
+    """Waliduje plik JPK XML względem schematu XSD."""
+    try:
+        # Wczytanie schematu XSD
+        xsd_doc = etree.parse(xsd_path)
+        xmlschema = etree.XMLSchema(xsd_doc)
+
+        # Wczytanie pliku XML
+        xml_doc = etree.parse(xml_path)
+
+        # Walidacja
+        is_valid = xmlschema.validate(xml_doc)
+        if is_valid:
+            print(f"Plik {xml_path} jest poprawny względem schematu XSD.")
+        else:
+            print(f"Plik {xml_path} nie jest poprawny względem schematu XSD.")
+            print(xmlschema.error_log)
+        return is_valid, xml_doc
+    except etree.XMLSyntaxError as e:
+        print(f"Błąd składni XML: {e}")
+        return False, None
+    except Exception as e:
+        print(f"Wystąpił błąd: {e}")
+        return False, None
+
+def parse_jpk_v7m(xml_doc):
+    """Parsuje kluczowe dane z pliku JPK_V7M."""
+    # Definicja przestrzeni nazw
+    ns = {
+        'jpk': 'http://jpk.mf.gov.pl/wzor/2020/10/01/10011/',
+        'etd': 'http://crd.gov.pl/xml/schematy/dziedzinowe/mf/2020/06/25/eD/DefinicjeTypy/'
+    }
+
+    # Pobieranie nagłówka
+    header = xml_doc.find('.//jpk:Naglowek', namespaces=ns)
+    if header is not None:
+        kod_formularza = header.find('jpk:KodFormularza', namespaces=ns).text
+        wariant_formularza = header.find('jpk:WariantFormularza', namespaces=ns).text
+        data_wytworzenia = header.find('jpk:DataWytworzeniaJPK', namespaces=ns).text
+        print(f"Nagłówek JPK:")
+        print(f"  Kod formularza: {kod_formularza}")
+        print(f"  Wariant formularza: {wariant_formularza}")
+        print(f"  Data wytworzenia: {data_wytworzenia}")
+
+    # Pobieranie podmiotu
+    podmiot = xml_doc.find('.//jpk:Podmiot1', namespaces=ns)
+    if podmiot is not None:
+        nip = podmiot.find('.//etd:NIP', namespaces=ns).text
+        nazwa = podmiot.find('.//etd:PelnaNazwa', namespaces=ns).text
+        print(f"\nPodmiot:")
+        print(f"  NIP: {nip}")
+        print(f"  Nazwa: {nazwa}")
+
+    # Pobieranie sprzedaży (przykład)
+    sprzedaz = xml_doc.findall('.//jpk:SprzedazWiersz', namespaces=ns)
+    print(f"\nLiczba wierszy sprzedaży: {len(sprzedaz)}")
+    for i, wiersz in enumerate(sprzedaz, 1):
+        lp = wiersz.find('jpk:LpSprzedazy', namespaces=ns).text
+        nr_kontrahenta = wiersz.find('jpk:NrKontrahenta', namespaces=ns).text
+        nazwa_kontrahenta = wiersz.find('jpk:NazwaKontrahenta', namespaces=ns).text
+        netto = wiersz.find('jpk:K_19', namespaces=ns).text if wiersz.find('jpk:K_19', namespaces=ns) is not None else '0'
+        vat = wiersz.find('jpk:K_20', namespaces=ns).text if wiersz.find('jpk:K_20', namespaces=ns) is not None else '0'
+        print(f"\nWiersz sprzedaży {i}:")
+        print(f"  LP: {lp}")
+        print(f"  Nr kontrahenta: {nr_kontrahenta}")
+        print(f"  Nazwa kontrahenta: {nazwa_kontrahenta}")
+        print(f"  Netto (K_19): {netto}")
+        print(f"  VAT (K_20): {vat}")
+
+def name():
+    # Ścieżki do plików (dostosuj do swoich lokalizacji)
+    xml_path = "jpk_v7m.xml"
+    xsd_path = "JPK_V7M_1_0.xsd"
+
+    # Walidacja pliku XML
+    is_valid, xml_doc = validate_jpk_xml(xml_path, xsd_path)
+    
+    # Parsowanie, jeśli walidacja przeszła pomyślnie
+    if is_valid and xml_doc is not None:
+        parse_jpk_v7m(xml_doc)
+    else:
+        print("Parsowanie przerwane z powodu błędów walidacji.")
