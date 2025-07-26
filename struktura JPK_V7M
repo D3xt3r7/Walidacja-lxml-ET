@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JPK xmlns="http://jpk.mf.gov.pl/wzor/2020/10/01/10011/" xmlns:etd="http://crd.gov.pl/xml/schematy/dziedzinowe/mf/2020/06/25/eD/DefinicjeTypy/">
+  <Naglowek>
+    <KodFormularza>JPK_V7M</KodFormularza>
+    <WariantFormularza>1</WariantFormularza>
+    <DataWytworzeniaJPK>2023-10-01T12:00:00</DataWytworzeniaJPK>
+  </Naglowek>
+  <Podmiot1>
+    <IdentyfikatorPodmiotu>
+      <etd:NIP>1234567890</etd:NIP>
+      <etd:PelnaNazwa>Firma Testowa</etd:PelnaNazwa>
+    </IdentyfikatorPodmiotu>
+  </Podmiot1>
+  <SprzedazWiersz>
+    <LpSprzedazy>1</LpSprzedazy>
+    <NrKontrahenta>9876543210</NrKontrahenta>
+    <NazwaKontrahenta>Kontrahent SA</NazwaKontrahenta>
+    <K_19>1000.00</K_19>
+    <K_20>230.00</K_20>
+  </SprzedazWiersz>
+</JPK>
